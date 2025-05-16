@@ -1,0 +1,11 @@
+services:
+  # Local user provider for tests with predefined users
+  App\Security\LocalUserProvider:
+    arguments:
+      $users:
+        testuser:
+          password: testpassword
+          roles: ['ROLE_USER']
+        testadmin:
+          password: testpassword
+          roles: ['ROLE_ADMIN']
