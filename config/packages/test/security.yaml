@@ -1,0 +1,11 @@
+security:
+  providers:
+    # Use the local_users provider for tests
+    local_users:
+      id: App\Security\LocalUserProvider
+
+  firewalls:
+    refresh:
+      provider: local_users
+    main:
+      provider: local_users

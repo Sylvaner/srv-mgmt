@@ -1,0 +1,34 @@
+api_platform:
+    title: SRV-Mgmt
+    version: 1.0.0
+    formats:
+        json: ['application/json']
+    patch_formats:
+        json: ['application/merge-patch+json']
+    error_formats:
+        jsonproblem: ['application/problem+json']
+    docs_formats:
+        json: ['application/json']
+        jsonopenapi: ['application/vnd.openapi+json']
+        html: ['text/html']
+    defaults:
+        stateless: true
+        pagination_enabled: false # Désactiver la pagination par défaut
+        pagination_client_enabled: true # Activer la possibilité d'activer la pagination
+        pagination_client_items_per_page: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+#        extra_properties:
+#            standard_put: true
+#            rfc_7807_compliant_errors: true
+    collection:
+        pagination:
+            enabled_parameter_name: pagination # Offrir la possiblité d'activer la pagination
+            items_per_page_parameter_name: itemsPerPage
+#    keep_legacy_inflector: false
+    use_symfony_listeners: true
+    swagger:
+        api_keys:
+            JWT:
+                name: Authorization
+                type: header
