@@ -1,0 +1,55 @@
+image: jakzal/phpqa:php8.3
+
+before_script:
+  - apt-get update -qq
+  - apt-get install -y --no-install-recommends libldap2-dev libsodium-dev libpq-dev
+  - docker-php-ext-install -j$(nproc) ldap intl bz2 zip sodium bcmath pcntl pdo_pgsql pgsql
+  - composer install --no-interaction --no-progress
+  - pecl install -f xdebug-3.3.2
+  - echo 'zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20230831/xdebug.so' > /usr/local/etc/php/conf.d/docker-php-xdebug.ini && echo 'xdebug.mode=develop,coverage' >> /usr/local/etc/php/conf.d/docker-php-xdebug.ini && echo 'xdebug.start_with_request = yes' >> /usr/local/etc/php/conf.d/docker-php-xdebug.ini
+
+cache:
+  key: ${CI_COMMIT_REF_NAME}
+  paths:
+    - vendor/
+
+stages:
+  - SecurityChecker
+  - CodingStandards
+  - UnitTests
+
+variables:
+  POSTGRES_DB: "test_rest_db"
+  POSTGRES_USER: "test_rest_user"
+  POSTGRES_PASSWORD: "!ChangeMe!"
+
+security-checker:
+  stage: SecurityChecker
+  script:
+    - local-php-security-checker  --path=./composer.lock
+  allow_failure: false
+
+phpcs:
+  stage: CodingStandards
+  script:
+    - phpcs -v --standard=PSR12 --ignore=./src/Kernel.php ./src
+  allow_failure: false
+
+phpstan:
+  stage: CodingStandards
+  script:
+    - phpstan analyse ./src
+  allow_failure: false
+
+phpunit:
+  services:
+    - postgres:16-alpine
+    - thoteam/slapd-server-mock
+  stage: UnitTests
+  script:
+    - php bin/console lexik:jwt:generate-keypair
+    - php bin/console doctrine:database:create --env=test
+    - php bin/console doctrine:schema:create --env=test
+    - php bin/console doctrine:fixtures:load --purge-with-truncate --group=tests --env=test -q
+    - php bin/phpunit --coverage-text --coverage-filter src
+  allow_failure: false

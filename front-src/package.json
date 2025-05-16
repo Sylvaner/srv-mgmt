@@ -1,0 +1,43 @@
+{
+  "name": "srv-mgmt-front",
+  "version": "0.0.1",
+  "description": "Front de base pour une API REST",
+  "productName": "SRV Managment",
+  "author": "Sylvain DANGIN",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint --ext .js,.ts,.vue ./",
+    "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
+    "test": "echo \"No test specified\" && exit 0",
+    "dev": "quasar dev",
+    "build": "quasar build"
+  },
+  "dependencies": {
+    "@quasar/extras": "1.16.17",
+    "pinia": "3.0.2",
+    "quasar": "2.18.1",
+    "vue": "^3.4.18",
+    "vue-router": "4.5.1"
+  },
+  "devDependencies": {
+    "@quasar/app-vite": "2.2.0",
+    "@types/node": "^20.17.32",
+    "@typescript-eslint/eslint-plugin": "8.31.1",
+    "@typescript-eslint/parser": "8.31.1",
+    "@vue/eslint-config-typescript": "^14.5.0",
+    "autoprefixer": "^10.4.2",
+    "cross-spawn": "^7.0.6",
+    "eslint": "9.25.1",
+    "eslint-config-prettier": "10.1.2",
+    "eslint-plugin-vue": "10.1.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.3.3",
+    "vue-tsc": "2.2.10"
+  },
+  "engines": {
+    "node": "^24 || ^22 || ^20 || ^18",
+    "npm": ">= 6.13.4",
+    "yarn": ">= 1.21.1"
+  }
+}
