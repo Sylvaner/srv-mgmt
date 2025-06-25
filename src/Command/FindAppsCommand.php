@@ -58,6 +58,9 @@ class FindAppsCommand extends Command
             if ($this->debug) {
                 $output->writeln($app->getName() . ' - ' . $app->getUpdateType()->getName());
             }
+            if (!$app->getServer()->isEnabled()) {
+                continue;
+            }
             $updateType = $app->getUpdateType()->getName();
             $updateResource = $app->getUpdateResource();
             $latestVersion = null;

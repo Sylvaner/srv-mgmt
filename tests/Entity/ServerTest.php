@@ -45,6 +45,13 @@ class ServerTest extends TestCase
         $doc = 'Test documentation';
         $server->setDocumentation($doc);
         $this->assertEquals($doc, $server->getDocumentation());
+        
+        // Test disabled state
+        $this->assertFalse($server->isDisabled(), 'Le serveur devrait être actif par défaut');
+        $server->setDisabled(true);
+        $this->assertTrue($server->isDisabled(), 'Le serveur devrait être désactivé');
+        $server->setDisabled(false);
+        $this->assertFalse($server->isDisabled(), 'Le serveur devrait être réactivé');
     }
 
     public function testRelations(): void

@@ -221,6 +221,25 @@ APP_AUTH_TYPE=ldap
 APP_AUTH_PROVIDER=ldap_server
 ```
 
+Ainsi que dans le fichier `config/packages/security.yaml`, les paramètres providers :
+
+```
+  firewalls:
+    dev:
+      pattern: ^/(_(profiler|wdt)|css|images|js)/
+      security: false
+    refresh:
+      pattern: ^/api/token/refresh
+      stateless: true
+      provider: ldap_server
+      refresh_jwt: ~
+    main:
+      lazy: true
+      provider: ldap_server
+      stateless: true
+      jwt: ~
+```
+
 #### Configuration LDAP
 
 Si vous utilisez le mode LDAP, configurez les paramètres de connexion au serveur LDAP :
@@ -362,6 +381,7 @@ cd dev
 docker compose --env-file .env.local up -d
 docker exec -it mgmt-apache bash
 cd /var/www/html
+composer install
 ```
 
 Générer la clé publique et privée pour les tokens JWT :
@@ -401,6 +421,7 @@ docker compose --env-file .env.test.local -f tests/docker-compose.yaml up -d
 ### Préparation de la base de données de test
 
 ```bash
+docker exec -it rest-test-php bash
 php bin/console doctrine:database:create --env=test
 php bin/console doctrine:schema:create --env=test
 php bin/console doctrine:fixtures:load --purge-with-truncate --group=tests --env=test

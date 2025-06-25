@@ -17,9 +17,29 @@
             v-for="server of serversStore.sortedListByName"
             :key="`edit-server-${server.id}`"
           >
-            <q-item-section @click="showEditServerForm(server.id)">{{
-              server.name
-            }}</q-item-section>
+            <q-item-section @click="showEditServerForm(server.id)">
+              <div class="row items-center">
+                <q-icon
+                  :name="server.disabled ? 'mdi-server-off' : 'mdi-server'"
+                  :color="server.disabled ? 'negative' : 'positive'"
+                  class="q-mr-sm"
+                />
+                {{ server.name }}
+              </div>
+            </q-item-section>
+            <q-item-section side>
+              <q-toggle
+                :model-value="!server.disabled"
+                @update:model-value="
+                  (val) => toggleServerStatus(server.id, !val)
+                "
+                color="positive"
+                checked-icon="check"
+                unchecked-icon="close"
+                size="md"
+                dense
+              />
+            </q-item-section>
           </q-item>
         </q-list>
       </div>
@@ -139,6 +159,7 @@ const server: Ref<ServerFormData> = ref({
   ip: '',
   apps: [],
   documentation: '',
+  disabled: false,
 });
 const newApp: Ref<App> = ref({
   id: -1,
@@ -150,6 +171,7 @@ const newApp: Ref<App> = ref({
   updateResource: '',
   extraUpdateResource: '',
   documentation: '',
+  disabled: false,
   updateType: {
     id: 0,
     name: '',
@@ -200,6 +222,7 @@ function showEditServerForm(serverId: number) {
     apps: serverToEdit.apps,
     type: serverToEdit.type.id,
     documentation: serverToEdit.documentation,
+    disabled: serverToEdit.disabled,
   };
   showServerForm.value = true;
 }
@@ -210,6 +233,7 @@ function resetForm() {
   server.value.ip = '';
   server.value.apps = [];
   server.value.documentation = '';
+  server.value.disabled = false;
   formMode.value = ServerFormMode.Add;
 }
 
@@ -260,13 +284,44 @@ function deletedApp(appName: string) {
   refreshServerForm();
 }
 
-function removeServer() {
-  fetcher('/api/servers/' + server.value.id, 'DELETE').then((response) => {
-    serversStore.updateAll();
-    if (response.status === 204) {
-      $q.notify(`Serveur ${server.value.name} supprimé.`);
-    }
+async function removeServer() {
+  if (server.value.id) {
+    await serversStore.remove(server.value.id);
     resetForm();
-  });
+    showServerForm.value = false;
+    serversStore.updateAll();
+  }
+}
+
+async function toggleServerStatus(serverId: number, disabled: boolean) {
+  try {
+    const response = await fetcher(
+      `/api/servers/${serverId}`,
+      'PATCH',
+      {
+        disabled: disabled,
+      },
+      {
+        'Content-Type': 'application/merge-patch+json',
+      },
+    );
+
+    if (response.ok) {
+      await serversStore.updateAll();
+    } else {
+      $q.notify({
+        color: 'negative',
+        message: 'Erreur lors de la mise à jour du statut du serveur',
+        icon: 'report_problem',
+      });
+    }
+  } catch (error) {
+    console.error('Error toggling server status:', error);
+    $q.notify({
+      color: 'negative',
+      message: 'Erreur lors de la mise à jour du statut du serveur',
+      icon: 'report_problem',
+    });
+  }
 }
 </script>

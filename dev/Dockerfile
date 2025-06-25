@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM ubuntu:latest
 RUN apt-get update && \
     apt-get install -y composer php-cli apache2 libapache2-mod-php php-xml php-ldap php-pgsql && \
     a2enmod rewrite

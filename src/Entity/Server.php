@@ -85,10 +85,15 @@ class Server
     #[Groups(['server:read', 'server:write'])]
     private ?string $documentation = null;
 
+    #[ORM\Column]
+    #[Groups(['server:read', 'server:write'])]
+    private bool $disabled = false;
+
     public function __construct()
     {
         $this->logs = new ArrayCollection();
         $this->apps = new ArrayCollection();
+        $this->disabled = false;
     }
 
     public function getId(): ?int
@@ -213,6 +218,22 @@ class Server
             }
         }
 
+        return $this;
+    }
+
+    public function isDisabled(): bool
+    {
+        return $this->disabled;
+    }
+
+    public function isEnabled(): bool
+    {
+        return !$this->disabled;
+    }
+
+    public function setDisabled(bool $disabled): static
+    {
+        $this->disabled = $disabled;
         return $this;
     }
 

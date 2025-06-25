@@ -1,12 +1,18 @@
-export interface Server {
-  id: number;
+export interface ServerFormData {
+  id?: number;
   name: string;
   ip: string;
+  type?: number;
+  documentation?: string;
+  disabled: boolean;
+  apps: App[];
+}
+
+export interface Server extends Omit<ServerFormData, 'type'> {
+  id: number;
   type: ServerType;
   lastUpdate?: string;
   lastCheck?: string;
-  documentation?: string;
-  apps: App[];
 }
 
 export interface ServerType {
@@ -36,6 +42,7 @@ export interface App {
   documentation: string;
   updateResource: string;
   extraUpdateResource: string;
+  disabled: boolean;
   updateType: AppUpdateType;
 }
 
@@ -43,16 +50,7 @@ export interface AppUpdateType {
   id: number;
   name: string;
 }
-export interface ServerFormData {
-  id?: number;
-  name: string;
-  ip: string;
-  type?: number;
-  lastUpdate?: string;
-  lastCheck?: string;
-  apps: App[];
-  documentation?: string;
-}
+// ServerFormData est maintenant défini plus haut
 
 export interface Log {
   id: number;

@@ -65,6 +65,7 @@ const filteredList = computed(() => {
   } else {
     rawList = serversStore.sortedListByName;
   }
+  rawList = rawList.filter((value) => value.disabled === false);
   rawList = rawList.filter(
     (value) => value.name.indexOf(textFilter.value) >= 0,
   );
