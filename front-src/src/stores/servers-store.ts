@@ -46,6 +46,18 @@ export const useServersStore = defineStore('server', {
         }
       });
     },
+    remove(serverId: number): Promise<void> {
+      return new Promise<void>((resolve, reject) => {
+        fetcher('/api/servers/' + serverId, 'DELETE').then((response) => {
+          if (response.status === 204 || response.status === 200) {
+            delete this.servers[serverId];
+            resolve();
+          } else {
+            reject();
+          }
+        });
+      });
+    },
   },
   getters: {
     sortedListByName: (state) =>

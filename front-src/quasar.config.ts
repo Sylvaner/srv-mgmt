@@ -56,7 +56,6 @@ export default configure((/* ctx */) => {
       // polyfillModulePreload: true,
       distDir: '../templates/front',
       env: {
-        //        baseUrl: 'https://srv-mgmt.ecole-paysage.fr',
         //        baseUrl: 'http://localhost'
       },
       afterBuild: () => {
