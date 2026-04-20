@@ -24,7 +24,8 @@ security:
       pattern: ^/api/token/refresh
       stateless: true
       provider: local_users
-      refresh_jwt: ~
+      refresh_jwt:
+        check_path: /api/token/refresh
     main:
       lazy: true
       provider: local_users
@@ -41,7 +42,7 @@ security:
   # Note: Only the *first* access control that matches will be used
   access_control:
     - { path: ^/api/login, roles: PUBLIC_ACCESS }
-    - { path: ^/api/refresh/token, roles: PUBLIC_ACCESS }
+    - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS }
     - { path: ^/api$, roles: PUBLIC_ACCESS }
     - { path: ^/api/*, roles: IS_AUTHENTICATED_FULLY }
 

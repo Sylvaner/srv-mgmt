@@ -1,4 +1,4 @@
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 # Installer les dépendances nécessaires
 RUN apt-get update && apt-get install -y \
@@ -12,12 +12,17 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Installer les extensions PHP requises
-RUN docker-php-ext-install pdo pdo_mysql \
-    && docker-php-ext-install pdo_pgsql \
-    && docker-php-ext-install ldap \
-    && docker-php-ext-install mbstring \
-    && docker-php-ext-install zip \
-    && docker-php-ext-install gd
+RUN docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    pdo_pgsql \
+    ldap \
+    mbstring \
+    zip \
+    gd
+
+# Installer Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Configuration PHP
 COPY php.ini /usr/local/etc/php/conf.d/custom.ini

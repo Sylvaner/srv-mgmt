@@ -27,7 +27,7 @@ L'application est basée sur une API REST en Symfony avec support pour l'authent
 
 #### Configuration requise
 
-- PHP 8.3 ou supérieur avec les extensions suivantes :
+- PHP 8.4 ou supérieur avec les extensions suivantes :
   - pdo_pgsql (pour PostgreSQL) ou pdo_mysql (pour MySQL / MariaDB)
   - ldap
   - intl
@@ -119,7 +119,7 @@ server {
     }
 
     location ~ ^/index\.php(/|$) {
-        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
         fastcgi_split_path_info ^(.+\.php)(/.*)$;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
@@ -156,7 +156,7 @@ sudo systemctl reload nginx
 Le projet est configuré avec les services suivants :
 
 - Nginx (serveur web)
-- PHP-FPM 8.3 (avec extensions pour PostgreSQL, MySQL et LDAP)
+- PHP-FPM 8.4 (avec extensions pour PostgreSQL, MySQL et LDAP)
 - PostgreSQL 15
 
 Structure des fichiers Docker :
@@ -181,25 +181,27 @@ srv-mgmt/
    cd srv-mgmt
    ```
 
-2. Configurer le fichier `.env` avec les paramètres Docker :
+2. Personnaliser le fichier `.env` avec les paramètres Docker :
 
    ```
    # URL de la base de données pour Docker
-   DATABASE_URL="postgresql://postgres:postgres@database:5432/srv_mgmt?serverVersion=15&charset=utf8"
+   POSTGRES_DB=rest_db
+   POSTGRES_USER=rest_user
+   POSTGRES_PASSWORD=!ChangeMe!
    ```
 
 3. Lancer les conteneurs :
 
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 4. Installer les dépendances et configurer l'application :
    ```bash
-   docker-compose exec php-fpm composer install
-   docker-compose exec php-fpm php bin/console lexik:jwt:generate-keypair
-   docker-compose exec php-fpm php bin/console doctrine:schema:create
-   docker-compose exec php-fpm php bin/console doctrine:fixtures:load --group=prod
+   docker compose exec php composer install
+   docker compose exec php php bin/console lexik:jwt:generate-keypair
+   docker compose exec php php bin/console doctrine:schema:create
+   docker compose exec php php bin/console doctrine:fixtures:load --group=prod
    ```
 
 ## Configuration de l'application
@@ -268,6 +270,12 @@ Informations de connexion :
 
 - admin : admin_password
 - user : user_password
+
+Pour générer de nouveaux mots de passe :
+
+```
+docker compose exec php php -r "echo password_hash('monmotdepasse', PASSWORD_BCRYPT, ['cost' => 13]) . PHP_EOL;"
+```
 
 ## Génération du frontend
 
@@ -422,6 +430,7 @@ docker compose --env-file .env.test.local -f tests/docker-compose.yaml up -d
 
 ```bash
 docker exec -it rest-test-php bash
+cd /app
 php bin/console doctrine:database:create --env=test
 php bin/console doctrine:schema:create --env=test
 php bin/console doctrine:fixtures:load --purge-with-truncate --group=tests --env=test
