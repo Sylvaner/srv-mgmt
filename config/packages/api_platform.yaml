@@ -1,6 +1,7 @@
 api_platform:
   title: SRV-Mgmt
   version: 1.0.0
+  use_symfony_listeners: true
   formats:
     json: ["application/json"]
   patch_formats:
