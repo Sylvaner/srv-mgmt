@@ -32,8 +32,11 @@ class RefreshTokenRepository extends ServiceEntityRepository implements RefreshT
         return $qb->getQuery()->getResult();
     }
 
-    public function findInvalidBatch(?DateTimeInterface $datetime = null, ?int $batchSize = null, int $offset = 0): iterable
-    {
+    public function findInvalidBatch(
+        ?DateTimeInterface $datetime = null,
+        ?int $batchSize = null,
+        int $offset = 0
+    ): iterable {
         $qb = $this->createQueryBuilder('r');
 
         if (null !== $datetime) {

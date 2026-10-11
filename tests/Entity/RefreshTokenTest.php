@@ -3,7 +3,7 @@
 namespace App\Tests\Entity;
 
 use App\Entity\RefreshToken;
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken as BaseRefreshToken;
+use Gesdinet\JWTRefreshTokenBundle\Model\AbstractRefreshToken as BaseRefreshToken;
 use PHPUnit\Framework\TestCase;
 
 class RefreshTokenTest extends TestCase
