@@ -9,6 +9,7 @@ use App\Service\LocalAuthService;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationFailureHandler;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,7 +25,8 @@ class LoginController extends AbstractController
     public function __construct(
         private UserRepository $userRepository,
         private EntityManagerInterface $entityManager,
-        private ParameterBagInterface $parameterBag
+        private ParameterBagInterface $parameterBag,
+        private LoggerInterface $logger
     ) {
         $this->authType = $this->parameterBag->get('app.auth_type') ?? 'ldap';
     }
@@ -86,6 +88,11 @@ class LoginController extends AbstractController
             $this->entityManager->flush();
             return $authenticationSuccessHandler->handleAuthenticationSuccess($userFromRepo);
         } catch (AuthenticationException $e) {
+            // Le client ne reçoit qu'un 401 générique : la raison réelle est tracée ici (jamais le mot de passe)
+            $this->logger->warning('Login failed for "{username}": {reason}', [
+                'username' => is_object($content) && is_string($content->username ?? null) ? $content->username : '',
+                'reason' => $e->getMessage(),
+            ]);
             return $authenticationFailureHandler->onAuthenticationFailure($request, $e);
         }
     }

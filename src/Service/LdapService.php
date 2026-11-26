@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\Ldap\Adapter\ExtLdap\Adapter;
 use Symfony\Component\Ldap\Entry;
 use Symfony\Component\Ldap\Exception\ConnectionException;
@@ -19,7 +21,8 @@ class LdapService
         private string $ldapBaseSearch,
         private string $ldapUserKey,
         private string $ldapUser,
-        private string $ldapPassword
+        private string $ldapPassword,
+        private LoggerInterface $logger = new NullLogger()
     ) {
         // La connexion est établie au premier bind (lazy) et réutilisée pour toutes les opérations
         $this->ldap = new Ldap($ldapAdapter);
@@ -61,6 +64,8 @@ class LdapService
                 ['maxItems' => 2]
             )->execute()->toArray();
         } catch (ConnectionException $e) {
+            // Problème d'infrastructure (serveur injoignable, certificat refusé, compte de service invalide...)
+            $this->logger->error('LDAP connection failed during user search: ' . $e->getMessage());
             throw new AuthenticationException('LDAP connection failed: ' . $e->getMessage());
         }
 
@@ -78,6 +83,7 @@ class LdapService
         } catch (InvalidCredentialsException) {
             throw new AuthenticationException('Invalid password');
         } catch (ConnectionException $e) {
+            $this->logger->error('LDAP connection failed during user bind: ' . $e->getMessage());
             throw new AuthenticationException('LDAP connection failed: ' . $e->getMessage());
         }
 

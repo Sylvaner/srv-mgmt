@@ -80,4 +80,36 @@ class RefreshTokenTest extends WebTestCase
         $this->assertEquals($expectedUsername, $refreshTokenManager->get($data['refresh_token'])->getUsername());
         $this->assertEquals($this->refreshToken, $data['refresh_token']);
     }
+
+    /**
+     * En mode LDAP, le renouvellement doit retrouver l'utilisateur dans l'annuaire
+     * et non dans la liste des utilisateurs locaux.
+     */
+    public function testRefreshInLdapMode(): void
+    {
+        $originalAuthType = $_ENV['APP_AUTH_TYPE'] ?? 'local';
+        $_ENV['APP_AUTH_TYPE'] = 'ldap';
+        try {
+            $this->client->request(
+                'POST',
+                '/api/login',
+                [],
+                [],
+                ['CONTENT_TYPE' => 'application/json'],
+                '{"username":"adminuser1","password":"password"}'
+            );
+            $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
+            $refreshToken = json_decode($this->client->getResponse()->getContent(), true)['refresh_token'];
+
+            $this->client->request('POST', '/api/token/refresh', [], [], [
+                'CONTENT_TYPE' => 'application/json'
+            ], '{"refresh_token": "' . $refreshToken . '"}');
+            $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
+            $data = json_decode($this->client->getResponse()->getContent(), true);
+            $tokenManager = static::getContainer()->get(JWTTokenManagerInterface::class);
+            $this->assertEquals('adminuser1', $tokenManager->parse($data['token'])['username']);
+        } finally {
+            $_ENV['APP_AUTH_TYPE'] = $originalAuthType;
+        }
+    }
 }

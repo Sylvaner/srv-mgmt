@@ -16,6 +16,9 @@ security:
     # Local user provider
     local_users:
       id: App\Security\LocalUserProvider
+    # Provider du renouvellement du token : LDAP ou local selon APP_AUTH_TYPE
+    app_auth:
+      id: App\Security\AuthModeUserProvider
     # Utilisateur reconstruit à partir du contenu du JWT (identifiant + rôles).
     # Aucun accès LDAP ni base de données à chaque requête de l'API.
     jwt:
@@ -27,7 +30,7 @@ security:
     refresh:
       pattern: ^/api/token/refresh
       stateless: true
-      provider: local_users
+      provider: app_auth
       refresh_jwt:
         check_path: /api/token/refresh
     main:
