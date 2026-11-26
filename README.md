@@ -54,7 +54,8 @@ L'application est basée sur une API REST en Symfony avec support pour l'authent
    composer install
    ```
 
-3. Configurer les paramètres de connexion à la base de données dans le fichier `.env` :
+3. Configurer les paramètres de connexion à la base de données dans le fichier `.env.local` (à créer, voir
+   [Où écrire la configuration](#où-écrire-la-configuration)) :
 
    ```
    # Configuration PostgreSQL
@@ -181,7 +182,7 @@ srv-mgmt/
    cd srv-mgmt
    ```
 
-2. Personnaliser le fichier `.env` avec les paramètres Docker :
+2. Personnaliser le fichier `.env.local` avec les paramètres Docker :
 
    ```
    # URL de la base de données pour Docker
@@ -206,6 +207,24 @@ srv-mgmt/
 
 ## Configuration de l'application
 
+### Où écrire la configuration
+
+Ne modifiez jamais `.env` : il est versionné et contient les valeurs par défaut, une modification locale bloque ou
+écrase les mises à jour (`git pull`). Les réglages propres à une installation vont dans des fichiers **ignorés par git**,
+qui survivent aux mises à jour :
+
+- `.env.local` : réglages de la machine (base de données, LDAP, mode de connexion, secrets). Il suffit d'y mettre les
+  variables à changer, elles remplacent celles de `.env`.
+- `.env.prod.local` : idem, uniquement quand `APP_ENV=prod`.
+
+Alternative sans fichier : définir de vraies variables d'environnement (`env[APP_AUTH_TYPE] = ldap` dans le pool
+PHP-FPM, `SetEnv` dans Apache, `EnvironmentFile` dans systemd). Elles ont priorité sur tous les fichiers, et les secrets
+restent hors du dossier du projet.
+
+Pensez aussi à remplacer en production `APP_SECRET` et `JWT_PASSPHRASE` (valeurs de démonstration dans `.env`).
+Si vous utilisez `composer dump-env prod`, relancez la commande après chaque modification, puis
+`php bin/console cache:clear`.
+
 ### Authentification
 
 L'application supporte deux modes d'authentification :
@@ -213,51 +232,40 @@ L'application supporte deux modes d'authentification :
 1. **LDAP** : Authentification via un serveur LDAP externe
 2. **Local** : Authentification via une liste d'utilisateurs définie dans la configuration
 
-La configuration du mode d'authentification se fait dans le fichier `.env` :
+Le mode se choisit avec **une seule variable**, dans le fichier `.env.local` (ne modifiez pas `.env`, il contient les
+valeurs par défaut). Aucun autre fichier n'est à modifier :
 
 ```
-# Mode d'authentification ('ldap' ou 'local')
-APP_AUTH_TYPE=ldap
-
-# Fournisseur d'authentification ('ldap_server' ou 'local_users')
-APP_AUTH_PROVIDER=ldap_server
+APP_AUTH_TYPE=ldap   # ou local
 ```
 
-Ainsi que dans le fichier `config/packages/security.yaml`, le provider du firewall `refresh` (renouvellement du token) :
+Après un changement de configuration en production, videz le cache (`php bin/console cache:clear`) et, si vous utilisez
+`composer dump-env prod`, régénérez le fichier. Les utilisateurs doivent se reconnecter lors d'un changement de mode.
 
-```
-  firewalls:
-    refresh:
-      pattern: ^/api/token/refresh
-      stateless: true
-      provider: ldap_server   # ou local_users en mode local
-      refresh_jwt:
-        check_path: /api/token/refresh
-    main:
-      provider: jwt           # inchangé : le token fait foi, aucune requête LDAP
-```
-
-Le firewall `main` (toutes les requêtes de l'API) utilise le provider `jwt` quel que soit le mode : l'utilisateur est
-reconstruit à partir du contenu du token, sans interroger le serveur LDAP. L'annuaire n'est donc sollicité qu'à la
-connexion et au renouvellement du token (au plus une fois par demi-durée de vie du token et par session ouverte).
-
-Une connexion LDAP représente 1 connexion réseau et 3 opérations : bind du compte de service, recherche du DN de
-l'utilisateur, bind avec le mot de passe saisi.
+Le mode ne sert qu'à la connexion et au renouvellement du token : toutes les autres requêtes de l'API sont authentifiées
+par le token signé, sans interroger l'annuaire. L'annuaire n'est donc sollicité qu'à la connexion (1 connexion réseau, 3
+opérations : bind du compte de service, recherche du DN de l'utilisateur, bind avec le mot de passe saisi) et au
+renouvellement du token (au plus une fois par demi-durée de vie du token et par session ouverte).
 
 #### Configuration LDAP
 
-Si vous utilisez le mode LDAP, configurez les paramètres de connexion au serveur LDAP :
+Seules ces variables sont nécessaires en mode LDAP :
 
 ```
+APP_AUTH_TYPE=ldap
 LDAP_HOST=ldap.example.com
-LDAP_PORT=389
-LDAP_ENCRYPTION=none
-LDAP_VERSION=3
-LDAP_USER_KEY=uid
-LDAP_BASE_DN="dc=example,dc=com"
-LDAP_BASE_SEARCH_DN="ou=people,dc=example,dc=com"
-LDAP_USER_DN="cn=admin,dc=example,dc=com"
-LDAP_USER_PASSWORD="admin_password"
+LDAP_ENCRYPTION=ssl                 # none, ssl (LDAPS) ou tls (StartTLS)
+LDAP_BASE_SEARCH_DN="ou=people,dc=example,dc=com"   # branche contenant les utilisateurs
+LDAP_USER_KEY=uid                   # samaccountname pour Active Directory
+LDAP_USER_DN="cn=readonly,dc=example,dc=com"        # compte de service en lecture seule
+LDAP_USER_PASSWORD="mot_de_passe"
+```
+
+Le port (636 en `ssl`, sinon 389) et la version du protocole (3) se déduisent automatiquement ; `LDAP_PORT` et
+`LDAP_VERSION` ne servent qu'à les forcer. Pour vérifier la configuration et comprendre un échec de connexion :
+
+```
+php bin/console app:ldap:check mon.identifiant
 ```
 
 ##### LDAP sécurisé (LDAPS, port 636)
@@ -265,7 +273,6 @@ LDAP_USER_PASSWORD="admin_password"
 Pour chiffrer les échanges (identifiants des utilisateurs et du compte de service), utilisez LDAPS :
 
 ```
-LDAP_PORT=636
 LDAP_ENCRYPTION=ssl
 ```
 

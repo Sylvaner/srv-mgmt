@@ -105,7 +105,6 @@ jobs:
           LDAP_ENCRYPTION: none
           LDAP_VERSION: 3
           LDAP_USER_KEY: uid
-          LDAP_BASE_DN: "dc=ldapmock,dc=local"
           LDAP_BASE_SEARCH_DN: "ou=people,dc=ldapmock,dc=local"
           LDAP_USER_DN: "cn=admin,dc=ldapmock,dc=local"
           LDAP_USER_PASSWORD: adminpass

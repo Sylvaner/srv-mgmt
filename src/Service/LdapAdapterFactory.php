@@ -27,14 +27,17 @@ final class LdapAdapterFactory
 
     public static function create(
         string $host,
-        int $port,
+        ?int $port,
         string $encryption,
-        int $version,
+        ?int $version,
         ?string $caCertFile = null,
         ?string $caCertDir = null,
         string $requireCert = 'demand'
     ): Adapter {
         $encryption = strtolower($encryption);
+        // Valeurs par défaut : le port suit le chiffrement, protocole LDAP v3
+        $port = $port ?: ('ssl' === $encryption ? 636 : 389);
+        $version = $version ?: 3;
         $options = [
             'protocol_version' => $version,
             'referrals' => false,

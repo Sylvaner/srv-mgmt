@@ -37,9 +37,9 @@ services:
         factory: ['App\Service\LdapAdapterFactory', 'create']
         arguments:
             $host: '%env(LDAP_HOST)%'
-            $port: '%env(int:LDAP_PORT)%'
+            $port: '%env(int:default::LDAP_PORT)%'
             $encryption: '%env(LDAP_ENCRYPTION)%'
-            $version: '%env(int:LDAP_VERSION)%'
+            $version: '%env(int:default::LDAP_VERSION)%'
             $caCertFile: '%env(default::LDAP_TLS_CA_CERT_FILE)%'
             $caCertDir: '%env(default::LDAP_TLS_CA_CERT_DIR)%'
             $requireCert: '%env(default:app.ldap_tls_require_cert:LDAP_TLS_REQUIRE_CERT)%'

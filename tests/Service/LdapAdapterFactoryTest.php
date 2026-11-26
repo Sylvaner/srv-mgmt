@@ -65,4 +65,13 @@ class LdapAdapterFactoryTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         LdapAdapterFactory::create('ldap.local', 636, 'ssl', 3, null, null, 'invalid');
     }
+
+    public function testDefaultPortFollowsEncryption(): void
+    {
+        $ssl = $this->getConfig(LdapAdapterFactory::create('ldap.local', null, 'ssl', null));
+        $this->assertSame('ldaps://ldap.local:636', $ssl['connection_string']);
+        $this->assertSame(3, $ssl['version']);
+        $plain = $this->getConfig(LdapAdapterFactory::create('ldap.local', 0, 'none', 0));
+        $this->assertSame('ldap://ldap.local:389', $plain['connection_string']);
+    }
 }

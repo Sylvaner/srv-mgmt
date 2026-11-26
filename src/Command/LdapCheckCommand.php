@@ -22,7 +22,7 @@ class LdapCheckCommand extends Command
         private LdapService $ldapService,
         #[Autowire('%app.auth_type%')] private string $authType,
         #[Autowire('%env(LDAP_HOST)%')] private string $host,
-        #[Autowire('%env(LDAP_PORT)%')] private string $port,
+        #[Autowire('%env(default::LDAP_PORT)%')] private ?string $port,
         #[Autowire('%env(LDAP_ENCRYPTION)%')] private string $encryption,
         #[Autowire('%env(LDAP_USER_KEY)%')] private string $userKey,
         #[Autowire('%env(LDAP_BASE_SEARCH_DN)%')] private string $baseSearch,
@@ -48,7 +48,7 @@ class LdapCheckCommand extends Command
 
         $io->definitionList(
             ['Type de login (APP_AUTH_TYPE)' => $this->authType],
-            ['Serveur' => sprintf('%s:%s (chiffrement : %s)', $this->host, $this->port, $this->encryption)],
+            ['Serveur' => sprintf('%s:%s (chiffrement : %s)', $this->host, $this->port ?: 'défaut', $this->encryption)],
             ['Compte de service' => $this->serviceUser],
             ['Base de recherche' => $this->baseSearch],
             ['Attribut de login' => $this->userKey],

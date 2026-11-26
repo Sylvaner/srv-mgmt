@@ -16,7 +16,6 @@ class LoginControllerTest extends WebTestCase
     private $client = null;
     private $parameterBag = null;
     private $originalAuthType = null;
-    private $originalAuthProvider = null;
 
     protected function setUp(): void
     {
@@ -31,7 +30,6 @@ class LoginControllerTest extends WebTestCase
         
         // Save original auth configuration
         $this->originalAuthType = $_ENV['APP_AUTH_TYPE'] ?? 'local';
-        $this->originalAuthProvider = $_ENV['APP_AUTH_PROVIDER'] ?? 'local_users';
 
         // Nettoyer les tokens de rafraîchissement existants
         $refreshTokenRepository = $this->entityManager->getRepository(RefreshToken::class);
@@ -46,7 +44,6 @@ class LoginControllerTest extends WebTestCase
     {
         // Restore original auth configuration
         $_ENV['APP_AUTH_TYPE'] = $this->originalAuthType;
-        $_ENV['APP_AUTH_PROVIDER'] = $this->originalAuthProvider;
         
         parent::tearDown();
     }
@@ -75,7 +72,6 @@ class LoginControllerTest extends WebTestCase
     {
         // Set auth type to LDAP for this test
         $_ENV['APP_AUTH_TYPE'] = 'ldap';
-        $_ENV['APP_AUTH_PROVIDER'] = 'ldap_server';
         
         $this->client->request(
             'POST',
@@ -124,7 +120,6 @@ class LoginControllerTest extends WebTestCase
     {
         // Set auth type to local for this test
         $_ENV['APP_AUTH_TYPE'] = 'local';
-        $_ENV['APP_AUTH_PROVIDER'] = 'local_users';
         
         $this->client->request(
             'POST',

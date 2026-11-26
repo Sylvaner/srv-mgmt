@@ -8,7 +8,7 @@ security:
     ldap_server:
       ldap:
         service: Symfony\Component\Ldap\Ldap
-        base_dn: "%env(LDAP_BASE_DN)%" # Domaine dans le LDAP
+        base_dn: "%env(LDAP_BASE_SEARCH_DN)%" # Branche où chercher les utilisateurs (la même qu'au login)
         search_dn: "%env(LDAP_USER_DN)%" # Utilisateur dans l'AD (readonly)
         search_password: "%env(LDAP_USER_PASSWORD)%" # Mot passe de l'utilisateur dans l'AD (readonly)
         uid_key: "%env(LDAP_USER_KEY)%"
