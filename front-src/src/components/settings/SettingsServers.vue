@@ -136,7 +136,7 @@ import {
   ServerFormData,
   ServerType,
 } from 'src/components/models';
-import SettingsAppForm from 'components/settings/SettingsAppForm.vue';
+import SettingsAppForm from 'src/components/settings/SettingsAppForm.vue';
 import { fetcher } from 'src/libs/Fetcher';
 import { useServersStore } from 'src/stores/servers-store';
 import { Ref, ref, computed } from 'vue';

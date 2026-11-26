@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import ServerListItem from 'components/ServerListItem.vue';
+import ServerListItem from 'src/components/ServerListItem.vue';
 import { Server } from 'src/components/models';
 import { getLastAction } from 'src/libs/DateHelper';
 import { useServersStore } from 'src/stores/servers-store';

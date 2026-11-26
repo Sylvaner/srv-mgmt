@@ -1,4 +1,4 @@
-image: jakzal/phpqa:php8.3
+image: jakzal/phpqa:php8.4
 
 before_script:
   - apt-get update -qq

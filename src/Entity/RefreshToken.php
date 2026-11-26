@@ -12,7 +12,8 @@ class RefreshToken extends AbstractRefreshToken
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    // Type explicite : avec l'union de types, doctrine/orm >= 3.5 déduit un VARCHAR sans auto-incrément
+    #[ORM\Column(type: 'integer')]
     protected string|int|null $id = null;
 
     #[ORM\Column(type: 'string', length: 128, unique: true)]

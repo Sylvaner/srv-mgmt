@@ -61,6 +61,7 @@ jobs:
         image: thoteam/slapd-server-mock
         ports:
           - 389:389
+          - 636:636
 
     steps:
       - uses: actions/checkout@v6

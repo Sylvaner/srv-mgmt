@@ -16,6 +16,10 @@ security:
     # Local user provider
     local_users:
       id: App\Security\LocalUserProvider
+    # Utilisateur reconstruit à partir du contenu du JWT (identifiant + rôles).
+    # Aucun accès LDAP ni base de données à chaque requête de l'API.
+    jwt:
+      lexik_jwt: ~
   firewalls:
     dev:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -28,7 +32,9 @@ security:
         check_path: /api/token/refresh
     main:
       lazy: true
-      provider: local_users
+      # Identique en mode LDAP et en mode local : l'authentification (LDAP ou locale) n'a lieu
+      # qu'à la connexion, ensuite le JWT signé fait foi jusqu'à son expiration.
+      provider: jwt
       stateless: true
       jwt: ~
 

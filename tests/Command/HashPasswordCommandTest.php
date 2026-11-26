@@ -20,7 +20,7 @@ class HashPasswordCommandTest extends KernelTestCase
         
         $application = new Application(self::$kernel);
         $command = new HashPasswordCommand($passwordHasher);
-        $application->add($command);
+        $application->addCommand($command);
         
         $this->commandTester = new CommandTester($command);
     }

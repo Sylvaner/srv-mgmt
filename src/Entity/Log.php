@@ -8,7 +8,7 @@ use ApiPlatform\Metadata\Link;
 use App\Repository\LogRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: LogRepository::class)]
 #[ApiResource(

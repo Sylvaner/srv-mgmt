@@ -8,6 +8,8 @@ parameters:
     app.auth_type: '%env(APP_AUTH_TYPE)%'
     # Local users configuration
     app.local_users: '%env(json:APP_LOCAL_USERS)%'
+    # Vérification du certificat du serveur LDAP en LDAPS / StartTLS (never, allow, try, demand, hard)
+    app.ldap_tls_require_cert: 'demand'
 
 services:
     # default configuration for services in *this* file
@@ -29,21 +31,25 @@ services:
     Symfony\Component\Ldap\Ldap:
         arguments: ['@Symfony\Component\Ldap\Adapter\ExtLdap\Adapter']
         tags: ['ldap']
+    # Adapter LDAP partagé (LdapService et provider security 'ldap_server')
+    # LDAP_ENCRYPTION : none (389, dev uniquement), ssl (LDAPS, 636) ou tls (StartTLS, 389)
     Symfony\Component\Ldap\Adapter\ExtLdap\Adapter:
+        factory: ['App\Service\LdapAdapterFactory', 'create']
         arguments:
-            -   host: '%env(LDAP_HOST)%'
-                port: '%env(LDAP_PORT)%'
-                encryption: '%env(LDAP_ENCRYPTION)%'
-                options:
-                    protocol_version: '%env(LDAP_VERSION)%'
-                    referrals: false
+            $host: '%env(LDAP_HOST)%'
+            $port: '%env(int:LDAP_PORT)%'
+            $encryption: '%env(LDAP_ENCRYPTION)%'
+            $version: '%env(int:LDAP_VERSION)%'
+            $caCertFile: '%env(default::LDAP_TLS_CA_CERT_FILE)%'
+            $caCertDir: '%env(default::LDAP_TLS_CA_CERT_DIR)%'
+            $requireCert: '%env(default:app.ldap_tls_require_cert:LDAP_TLS_REQUIRE_CERT)%'
     App\Service\LdapService:
         bind:
             $ldapBaseSearch: '%env(LDAP_BASE_SEARCH_DN)%'
             $ldapUser: '%env(LDAP_USER_DN)%'
             $ldapPassword: '%env(LDAP_USER_PASSWORD)%'
             $ldapUserKey: '%env(LDAP_USER_KEY)%'
-            
+
     # Local user provider configuration
     App\Security\LocalUserProvider:
         arguments:

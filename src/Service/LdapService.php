@@ -5,89 +5,82 @@ namespace App\Service;
 use Symfony\Component\Ldap\Adapter\ExtLdap\Adapter;
 use Symfony\Component\Ldap\Entry;
 use Symfony\Component\Ldap\Exception\ConnectionException;
+use Symfony\Component\Ldap\Exception\InvalidCredentialsException;
 use Symfony\Component\Ldap\Ldap;
+use Symfony\Component\Ldap\LdapInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class LdapService
 {
-    private Adapter $ldapAdapter;
-    private string $ldapBaseSearch;
     private Ldap $ldap;
-    private string $ldapUserKey;
-    private string $ldapUser;
-    private string $ldapPassword;
-    private bool $isConnected = false;
 
     public function __construct(
         Adapter $ldapAdapter,
-        string $ldapBaseSearch,
-        Ldap $ldap,
-        string $ldapUserKey,
-        string $ldapUser,
-        string $ldapPassword
+        private string $ldapBaseSearch,
+        private string $ldapUserKey,
+        private string $ldapUser,
+        private string $ldapPassword
     ) {
-        $this->ldapAdapter = $ldapAdapter;
-        $this->ldapBaseSearch = $ldapBaseSearch;
-        $this->ldap = $ldap;
-        $this->ldapUserKey = $ldapUserKey;
-        $this->ldapUser = $ldapUser;
-        $this->ldapPassword = $ldapPassword;
-        // Ne pas se connecter ici - attendre le premier appel
+        // La connexion est établie au premier bind (lazy) et réutilisée pour toutes les opérations
+        $this->ldap = new Ldap($ldapAdapter);
     }
 
     /**
-     * Établit la connexion LDAP si ce n'est pas déjà fait
+     * Vérifie les identifiants LDAP.
      *
-     * @return void
-     * @throws ConnectionException si la connexion échoue
-     */
-    private function ensureConnected(): void
-    {
-        if (!$this->isConnected) {
-            $this->ldap->bind($this->ldapUser, $this->ldapPassword);
-            $this->isConnected = true;
-        }
-    }
-
-    /**
-     * Vérifie les identifiants LDAP
+     * Une authentification coûte 1 connexion et 3 opérations : bind du compte de service,
+     * recherche du DN de l'utilisateur, bind avec le mot de passe saisi.
      *
      * @param string $username Nom d'utilisateur
      * @param string $password Mot de passe
      *
-     * @return Entry|null Entrée LDAP ou null si échec
+     * @return Entry Entrée LDAP de l'utilisateur
+     * @throws AuthenticationException si l'authentification échoue
      */
-    public function checkCredentials(string $username, string $password): ?Entry
+    public function checkCredentials(string $username, string $password): Entry
     {
+        // Un bind avec un mot de passe vide est un bind anonyme, accepté par certains serveurs LDAP
+        if ('' === $username || '' === $password) {
+            throw new AuthenticationException('Invalid password');
+        }
+
         try {
-            // S'assurer que la connexion est établie
-            $this->ensureConnected();
+            // Le bind est refait à chaque appel : le bind utilisateur précédent a changé
+            // l'identité de la connexion (service maintenu en mémoire, plusieurs appels).
+            $this->ldap->bind($this->ldapUser, $this->ldapPassword);
 
-            $ldap = new Ldap($this->ldapAdapter);
-            $search = [];
-            $value = null;
-            // Recherche si l'utilisateur existe
             // Cette étape doit être réalisée avant car il faut le DN du compte pour tester le mot de passe
-            $search = $ldap->query(
+            $entries = $this->ldap->query(
                 $this->ldapBaseSearch,
-                // userAccountControl=512 -> Le mot de passe n'est pas à changer et le compte est activé
-                '(&(objectClass=person)(' . $this->ldapUserKey . '=' . $username . '))'
+                sprintf(
+                    '(&(objectClass=person)(%s=%s))',
+                    $this->ldapUserKey,
+                    $this->ldap->escape($username, '', LdapInterface::ESCAPE_FILTER)
+                ),
+                // Deux résultats suffisent pour détecter un identifiant ambigu
+                ['maxItems' => 2]
             )->execute()->toArray();
-            // Vérifie qu'il y a un résultat unique
-            if (empty($search)) {
-                throw new AuthenticationException('LDAP entry not found ' . $this->ldapUserKey . '=' . $username);
-            }
-            $value = $search[0];
-            // Test du mot de passe en établissant une connexion
-            try {
-                $ldap->bind($value->getDn(), $password);
-            } catch (ConnectionException) {
-                throw new AuthenticationException('Invalid password');
-            }
-
-            return $value;
         } catch (ConnectionException $e) {
             throw new AuthenticationException('LDAP connection failed: ' . $e->getMessage());
         }
+
+        if (empty($entries)) {
+            throw new AuthenticationException('LDAP entry not found ' . $this->ldapUserKey . '=' . $username);
+        }
+        if (count($entries) > 1) {
+            throw new AuthenticationException('LDAP entry not unique ' . $this->ldapUserKey . '=' . $username);
+        }
+        $entry = $entries[0];
+
+        // Test du mot de passe en établissant une connexion avec le compte de l'utilisateur
+        try {
+            $this->ldap->bind($entry->getDn(), $password);
+        } catch (InvalidCredentialsException) {
+            throw new AuthenticationException('Invalid password');
+        } catch (ConnectionException $e) {
+            throw new AuthenticationException('LDAP connection failed: ' . $e->getMessage());
+        }
+
+        return $entry;
     }
 }

@@ -3,27 +3,27 @@ import { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/ServersPage.vue') }],
+    component: () => import('src/layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('src/pages/ServersPage.vue') }],
   },
   {
     path: '/login',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/LoginPage.vue') }],
+    component: () => import('src/layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('src/pages/LoginPage.vue') }],
   },
   {
     path: '/settings',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/SettingsPage.vue') }],
+    component: () => import('src/layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('src/pages/SettingsPage.vue') }],
   },
   {
     path: '/logs',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/LogsPage.vue') }],
+    component: () => import('src/layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('src/pages/LogsPage.vue') }],
   },
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue'),
+    component: () => import('src/pages/ErrorNotFound.vue'),
   },
 ];
 

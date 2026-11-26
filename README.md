@@ -223,31 +223,33 @@ APP_AUTH_TYPE=ldap
 APP_AUTH_PROVIDER=ldap_server
 ```
 
-Ainsi que dans le fichier `config/packages/security.yaml`, les paramètres providers :
+Ainsi que dans le fichier `config/packages/security.yaml`, le provider du firewall `refresh` (renouvellement du token) :
 
 ```
   firewalls:
-    dev:
-      pattern: ^/(_(profiler|wdt)|css|images|js)/
-      security: false
     refresh:
       pattern: ^/api/token/refresh
       stateless: true
-      provider: ldap_server
-      refresh_jwt: ~
+      provider: ldap_server   # ou local_users en mode local
+      refresh_jwt:
+        check_path: /api/token/refresh
     main:
-      lazy: true
-      provider: ldap_server
-      stateless: true
-      jwt: ~
+      provider: jwt           # inchangé : le token fait foi, aucune requête LDAP
 ```
+
+Le firewall `main` (toutes les requêtes de l'API) utilise le provider `jwt` quel que soit le mode : l'utilisateur est
+reconstruit à partir du contenu du token, sans interroger le serveur LDAP. L'annuaire n'est donc sollicité qu'à la
+connexion et au renouvellement du token (au plus une fois par demi-durée de vie du token et par session ouverte).
+
+Une connexion LDAP représente 1 connexion réseau et 3 opérations : bind du compte de service, recherche du DN de
+l'utilisateur, bind avec le mot de passe saisi.
 
 #### Configuration LDAP
 
 Si vous utilisez le mode LDAP, configurez les paramètres de connexion au serveur LDAP :
 
 ```
-LDAP_HOST=127.0.0.1
+LDAP_HOST=ldap.example.com
 LDAP_PORT=389
 LDAP_ENCRYPTION=none
 LDAP_VERSION=3
@@ -257,6 +259,31 @@ LDAP_BASE_SEARCH_DN="ou=people,dc=example,dc=com"
 LDAP_USER_DN="cn=admin,dc=example,dc=com"
 LDAP_USER_PASSWORD="admin_password"
 ```
+
+##### LDAP sécurisé (LDAPS, port 636)
+
+Pour chiffrer les échanges (identifiants des utilisateurs et du compte de service), utilisez LDAPS :
+
+```
+LDAP_PORT=636
+LDAP_ENCRYPTION=ssl
+```
+
+`LDAP_ENCRYPTION` accepte `none` (clair, développement uniquement), `ssl` (LDAPS, port 636) ou `tls` (StartTLS sur le
+port 389). Le certificat du serveur est vérifié avec les autorités de certification du système. Si le serveur utilise
+une autorité interne (ou un certificat auto-signé), indiquez-la :
+
+```
+# Fichier (ou dossier) contenant l'autorité de certification
+LDAP_TLS_CA_CERT_FILE=/etc/ssl/certs/ldap-ca.pem
+# LDAP_TLS_CA_CERT_DIR=/etc/ssl/ldap-ca/
+# Vérification du certificat : never, allow, try, demand (défaut), hard
+# LDAP_TLS_REQUIRE_CERT=demand
+```
+
+`LDAP_TLS_REQUIRE_CERT=never` désactive la vérification du certificat : à ne pas utiliser en production. Le nom d'hôte
+`LDAP_HOST` doit correspondre au nom présent dans le certificat. L'extension PHP `ldap` doit être compilée avec
+OpenLDAP (ou son équivalent) avec le support TLS.
 
 #### Configuration des utilisateurs locaux
 

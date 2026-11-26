@@ -15,7 +15,6 @@ doctrine:
         is_bundle: false
         dir: "%kernel.project_dir%/src/Entity"
         prefix: 'App\Entity'
-        alias: App
 
 when@test:
   doctrine:
@@ -26,8 +25,6 @@ when@test:
 when@prod:
   doctrine:
     orm:
-      auto_generate_proxy_classes: false
-      proxy_dir: "%kernel.build_dir%/doctrine/orm/Proxies"
       query_cache_driver:
         type: pool
         pool: doctrine.system_cache_pool

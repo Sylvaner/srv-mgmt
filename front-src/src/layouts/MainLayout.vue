@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { inject, ref } from 'vue';
-import MenuLink, { MenuLinkProps } from 'components/MenuLink.vue';
+import MenuLink, { MenuLinkProps } from 'src/components/MenuLink.vue';
 import { useUserStore } from 'src/stores/user-store';
 import { EventBus, useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';

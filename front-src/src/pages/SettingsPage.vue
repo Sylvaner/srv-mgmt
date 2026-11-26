@@ -21,9 +21,9 @@
 </template>
 
 <script setup lang="ts">
-import SettingsGeneral from 'components/settings/SettingsGeneral.vue';
-import SettingsServers from 'components/settings/SettingsServers.vue';
-import SettingsServerTypes from 'components/settings/SettingsServerTypes.vue';
+import SettingsGeneral from 'src/components/settings/SettingsGeneral.vue';
+import SettingsServers from 'src/components/settings/SettingsServers.vue';
+import SettingsServerTypes from 'src/components/settings/SettingsServerTypes.vue';
 import { ref } from 'vue';
 
 defineOptions({

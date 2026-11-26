@@ -7,5 +7,3 @@ security:
   firewalls:
     refresh:
       provider: local_users
-    main:
-      provider: local_users

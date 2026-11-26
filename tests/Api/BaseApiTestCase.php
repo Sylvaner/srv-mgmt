@@ -2,8 +2,8 @@
 
 namespace App\Tests\Api;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use ApiPlatform\Symfony\Bundle\Test\Client;
+use ApiPlatform\Test\ApiTestCase;
+use ApiPlatform\Test\Client;
 
 class BaseApiTestCase extends ApiTestCase
 {

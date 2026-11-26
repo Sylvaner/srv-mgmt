@@ -51,10 +51,8 @@ class LoginController extends AbstractController
 
             // Choose auth method based on configuration
             if ($this->authType === 'ldap') {
-                $ldapEntry = $ldapService->checkCredentials($content->username, $content->password);
-                if (null === $ldapEntry) {
-                    throw new AuthenticationException('LDAP authentication failed');
-                }
+                // Lève une AuthenticationException si l'authentification échoue
+                $ldapService->checkCredentials($content->username, $content->password);
                 $authSuccess = true;
             } elseif ($this->authType === 'local') {
                 $authSuccess = $localAuthService->checkCredentials($content->username, $content->password);

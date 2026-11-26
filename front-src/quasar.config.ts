@@ -55,6 +55,7 @@ export default configure((/* ctx */) => {
       // minify: false,
       // polyfillModulePreload: true,
       distDir: '../templates/front',
+      allowOutsideProjectDistDir: true, // Requis par @quasar/app-vite v3 (sortie vers ../templates)
       env: {
         //        baseUrl: 'http://localhost'
       },

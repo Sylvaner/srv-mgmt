@@ -14,29 +14,29 @@
     "build": "quasar build"
   },
   "dependencies": {
-    "@quasar/extras": "^1.18.0",
-    "pinia": "^3.0",
-    "quasar": "^2.19.3",
-    "vue": "^3.5.32",
-    "vue-router": "^5.0.4"
+    "@quasar/extras": "^2.1.0",
+    "pinia": "^4.1.0",
+    "quasar": "^2.36.0",
+    "vue": "^3.5.46",
+    "vue-router": "^5.5.2"
   },
   "devDependencies": {
-    "@quasar/app-vite": "^2.6.0",
-    "@types/node": "^25.6.0",
-    "@typescript-eslint/eslint-plugin": "^8.59.0",
-    "@typescript-eslint/parser": "^8.59.0",
-    "@vue/eslint-config-typescript": "^14.7.0",
-    "autoprefixer": "^10.5.0",
+    "@quasar/app-vite": "^3.10.4",
+    "@types/node": "^26.6.11",
+    "@typescript-eslint/eslint-plugin": "^8.74.0",
+    "@typescript-eslint/parser": "^8.74.0",
+    "@vue/eslint-config-typescript": "^14.9.0",
+    "autoprefixer": "^10.7.0",
     "cross-spawn": "^7.0.6",
-    "eslint": "^10.2.1",
+    "eslint": "^10.15.0",
     "eslint-config-prettier": "^10.1",
-    "eslint-plugin-vue": "^10.8.0",
-    "prettier": "^3.8.3",
+    "eslint-plugin-vue": "^10.12.1",
+    "prettier": "^3.10.1",
     "typescript": "^6.0.3",
-    "vue-tsc": "^3.2.7"
+    "vue-tsc": "^3.3.14"
   },
   "engines": {
-    "node": "^24 || ^22 || ^20 || ^18",
+    "node": "^26 || ^24 || ^22 || ^20",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   }
